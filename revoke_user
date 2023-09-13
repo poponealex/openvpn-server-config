@@ -4,6 +4,7 @@ PATH="/usr/bin"
 IFS=" "
 OPENVPN_PATH="/etc/openvpn"
 EASYRSA_PATH="$OPENVPN_PATH/easy-rsa"
+EASYRSA_VARS="$EASYRSA_PATH/vars"
 OVPN_PATH="$OPENVPN_PATH/client-ovpn"
 CRL_PATH="$EASYRSA_PATH/pki/crl.pem"
 
@@ -20,7 +21,7 @@ fi
 OVPN_FILE="$OVPN_PATH/$1.ovpn"
 
 cd "$EASYRSA_PATH" && \
-./easyrsa revoke $1 && \
+./easyrsa --vars="$EASYRSA_VARS" revoke $1 && \
 ./easyrsa gen-crl && \
 cp "$CRL_PATH" "$OPENVPN_PATH" && \
 rm -f $OVPN_FILE

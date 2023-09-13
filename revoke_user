@@ -1,0 +1,26 @@
+#!/bin/bash
+
+PATH="/usr/bin"
+IFS=" "
+OPENVPN_PATH="/etc/openvpn"
+EASYRSA_PATH="$OPENVPN_PATH/easy-rsa"
+OVPN_PATH="$OPENVPN_PATH/client-ovpn"
+CRL_PATH="$EASYRSA_PATH/pki/crl.pem"
+
+if [[ $# != 1 ]]; then
+    echo "Usage: $0 <client-uuid>"
+    exit 1
+fi
+
+if [[ ! $1 =~ [a-z0-9]{8}(-[a-z0-9]{4}){3}-[a-z0-9]{12} ]]; then
+    echo "Invalid UUID"
+    exit 1
+fi
+
+OVPN_FILE="$OVPN_PATH/$1.ovpn"
+
+cd "$EASYRSA_PATH" && \
+./easyrsa revoke $1 && \
+./easyrsa gen-crl && \
+cp "$CRL_PATH" "$OPENVPN_PATH" && \
+rm -f $OVPN_FILE

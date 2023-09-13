@@ -28,9 +28,12 @@ if [[ -f "$OVPN_PATH/$1.ovpn" ]]; then
 fi
 
 OVPN_FILE="$OVPN_PATH/$1.ovpn"
+EASYRSA_USER_VARS="$EASYRSA_PATH/custom-vars/vars-$1"
 
-cd $EASYRSA_PATH
-./easyrsa --vars="$EASYRSA_VARS" gen-req $1 nopass &>/dev/null && ./easyrsa --vars="$EASYRSA_VARS" sign-req client $1 &>/dev/null && \
+cd $EASYRSA_PATH && \
+cp $EASYRSA_VARS $EASYRSA_USER_VARS && \
+echo "set_var EASYRSA_REQ_CN $1" >> $EASYRSA_USER_VARS &&\
+./easyrsa --vars="$EASYRSA_USER_VARS" gen-req $1 nopass &>/dev/null && ./easyrsa --vars="$EASYRSA_USER_VARS" sign-req client $1 &>/dev/null && \
 cat $CLIENT_CONF > "$OVPN_FILE" && \
 echo "<ca>" >> "$OVPN_FILE" && \
 cat "$CA" >> "$OVPN_FILE" && \
@@ -42,5 +45,7 @@ echo -e "</key>\n<tls-auth>" >> "$OVPN_FILE" && \
 cat "$TA" >> "$OVPN_FILE" && \
 echo "</tls-auth>" >> "$OVPN_FILE" && \
 cat "$OVPN_FILE"
+
+rm "$EASYRSA_USER_VARS"
 
 exit 0
